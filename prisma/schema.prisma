@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Deal {
+  id              String   @id @default(cuid())
+  title           String
+  description     String?
+  originalPrice   Float
+  currentPrice    Float
+  discount        Float
+  imageUrl        String?
+  productUrl      String
+  affiliateUrl    String
+  platform        String   // "amazon" | "mercadolibre"
+  category        String
+  isActive        Boolean  @default(true)
+  expiresAt       DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  clicks          Click[]
+  priceHistory    PriceHistory[]
+}
+
+model PriceHistory {
+  id        String   @id @default(cuid())
+  dealId    String
+  price     Float
+  platform  String
+  createdAt DateTime @default(now())
+
+  deal      Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  @@index([dealId])
+  @@index([createdAt])
+}
+
+model Click {
+  id        String   @id @default(cuid())
+  dealId    String
+  source    String?  // "web" | "category" | "search"
+  createdAt DateTime @default(now())
+
+  deal      Deal     @relation(fields: [dealId], references: [id])
+}
+
+model Category {
+  id       String @id @default(cuid())
+  name     String @unique
+  slug     String @unique
+  icon     String?
+  isActive Boolean @default(true)
+}
