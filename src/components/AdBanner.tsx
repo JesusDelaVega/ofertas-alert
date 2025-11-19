@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 interface AdBannerProps {
   slot: string
@@ -19,13 +19,19 @@ export default function AdBanner({
   format = 'auto',
   responsive = true
 }: AdBannerProps) {
+  const adRef = useRef<HTMLModElement>(null)
+  const isLoaded = useRef(false)
+
   useEffect(() => {
+    if (isLoaded.current) return
+
     try {
-      if (typeof window !== 'undefined' && window.adsbygoogle) {
+      if (typeof window !== 'undefined' && window.adsbygoogle && adRef.current) {
         window.adsbygoogle.push({})
+        isLoaded.current = true
       }
     } catch (error) {
-      console.error('AdSense error:', error)
+      // Silently ignore duplicate ad errors
     }
   }, [])
 
@@ -47,6 +53,7 @@ export default function AdBanner({
 
   return (
     <ins
+      ref={adRef}
       className="adsbygoogle"
       style={{ display: 'block' }}
       data-ad-client={clientId}
