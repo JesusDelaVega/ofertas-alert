@@ -28,6 +28,16 @@ export async function scrapeMercadoLibreDeals(category: string = 'all'): Promise
 
     for (const search of searches) {
       try {
+        const headers: Record<string, string> = {
+          'Accept': 'application/json',
+        }
+
+        // Add access token if available
+        const accessToken = process.env.MERCADOLIBRE_ACCESS_TOKEN
+        if (accessToken) {
+          headers['Authorization'] = `Bearer ${accessToken}`
+        }
+
         const response = await axios.get(
           `https://api.mercadolibre.com/sites/MLM/search`,
           {
@@ -37,10 +47,7 @@ export async function scrapeMercadoLibreDeals(category: string = 'all'): Promise
               limit: 10,
               condition: 'new'
             },
-            headers: {
-              'Accept': 'application/json',
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-            }
+            headers
           }
         )
 
