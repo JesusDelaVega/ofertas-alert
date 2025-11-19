@@ -14,40 +14,30 @@ export async function scrapeMercadoLibreDeals(category: string = 'all'): Promise
   const deals: ScrapedDeal[] = []
 
   try {
-    // Búsquedas populares para encontrar ofertas reales
-    const searches = [
-      'celular samsung',
-      'laptop',
-      'audifonos bluetooth',
-      'smart tv',
-      'consola videojuegos',
-      'tablet',
-      'smartwatch',
-      'bocina bluetooth'
+    // Categorías populares de Mercado Libre México
+    const categories = [
+      'MLM1051', // Celulares
+      'MLM1648', // Computación
+      'MLM1000', // Electrónica
+      'MLM1144', // Videojuegos
     ]
 
-    for (const search of searches) {
+    for (const categoryId of categories) {
       try {
-        const headers: Record<string, string> = {
-          'Accept': 'application/json',
-        }
-
-        // Add access token if available
-        const accessToken = process.env.MERCADOLIBRE_ACCESS_TOKEN
-        if (accessToken) {
-          headers['Authorization'] = `Bearer ${accessToken}`
-        }
-
+        // Usar endpoint de highlights/deals que es público
         const response = await axios.get(
           `https://api.mercadolibre.com/sites/MLM/search`,
           {
             params: {
-              q: search,
+              category: categoryId,
               sort: 'relevance',
-              limit: 10,
-              condition: 'new'
+              limit: 15,
+              has_deals: 'yes'
             },
-            headers
+            headers: {
+              'Accept': 'application/json'
+            },
+            timeout: 10000
           }
         )
 
@@ -77,9 +67,9 @@ export async function scrapeMercadoLibreDeals(category: string = 'all'): Promise
         }
 
         // Pequeña pausa entre requests para no saturar la API
-        await new Promise(resolve => setTimeout(resolve, 200))
+        await new Promise(resolve => setTimeout(resolve, 500))
       } catch (err) {
-        console.error(`Error searching ${search}:`, err)
+        console.error(`Error fetching category ${categoryId}:`, err)
       }
     }
 
